@@ -23,6 +23,7 @@ export function AppLayout({ children }) {
           flexDirection: 'column',
           p: 3,
           overflow: 'auto',
+          animation: 'fadeIn 0.35s ease-out both',
         }}
       >
         {children}

@@ -5,8 +5,10 @@ import {
     TextField,
     Typography,
 } from '@mui/material'
+import { useI18n } from '../context/I18nContext'
 
 export function TopBar({ title, subtitle }) {
+    const { t } = useI18n()
     return (
         <Box
             sx={{
@@ -19,7 +21,7 @@ export function TopBar({ title, subtitle }) {
             }}
         >
             <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                     {title}
                 </Typography>
                 {subtitle && (
@@ -30,7 +32,7 @@ export function TopBar({ title, subtitle }) {
             </Box>
             <TextField
                 size="small"
-                placeholder="Search..."
+                placeholder={t('common.search')}
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">

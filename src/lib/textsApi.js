@@ -1,8 +1,9 @@
 import { supabase } from './supabaseClient'
 
-export async function createText({ title, content, language, classroom_code }) {
+export async function createText({ title, content, language, classroom_code, created_by }) {
   const row = { title, content, language }
   if (classroom_code) row.classroom_code = classroom_code
+  if (created_by) row.created_by = created_by
 
   const { data, error } = await supabase
     .from('texts')
@@ -20,7 +21,7 @@ export async function createText({ title, content, language, classroom_code }) {
 export async function listTexts(classroomCode) {
   let query = supabase
     .from('texts')
-    .select('id, title, language, created_at, classroom_code')
+    .select('id, title, language, created_at, classroom_code, created_by')
     .order('created_at', { ascending: false })
 
   if (classroomCode) {

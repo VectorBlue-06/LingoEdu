@@ -28,7 +28,7 @@ export const DEFAULT_STRINGS = {
   'nav.courses': 'My Courses',
   'nav.allCourses': 'All Courses',
   'nav.calendar': 'Calendar',
-  'nav.notes': 'Notes',
+  'nav.classes': 'Classes',
   'nav.settings': 'Settings',
 
   // UserPanel
@@ -65,10 +65,7 @@ export const DEFAULT_STRINGS = {
 
   // Student
   'student.welcome': 'Welcome',
-  'student.subtitle': 'Choose a text, then translate it into a language you are learning.',
-  'student.lastCourse': 'My Last Course',
-  'student.joinedCourses': 'Courses I Have Joined',
-  'student.noCourses': 'No courses available yet.',
+  'student.noCourses': 'No texts in this classroom yet.',
   'student.original': 'Original content',
   'student.targetLang': 'Target language',
   'student.translate': 'Translate',
@@ -84,13 +81,15 @@ export const DEFAULT_STRINGS = {
   'student.sourceLang': 'Source language',
   'student.loadError': 'Could not load the selected text.',
   'student.translateError': 'Translation failed. Please try again.',
+  'student.alreadyJoined': 'You have already joined this classroom.',
+  'student.classroom': 'Classroom',
+  'student.leave': 'Leave',
+  'student.noRecentCourse': 'No course viewed yet',
+  'student.lastViewed': 'Last Viewed',
 
   // Teacher
   'teacher.welcome': 'Welcome back',
-  'teacher.subtitle': 'Create study texts that your students can later translate and read.',
   'teacher.totalUploads': 'Total Uploads',
-  'teacher.activeStudents': 'Active Students',
-  'teacher.languages': 'Languages',
   'teacher.uploadContent': 'Upload Content',
   'teacher.title': 'Title',
   'teacher.language': 'Language',
@@ -118,6 +117,15 @@ export const DEFAULT_STRINGS = {
   'teacher.pdf': 'PDF',
   'teacher.photo': 'Photo',
   'teacher.videoLink': 'Video Link',
+  'teacher.textSaved': 'Text uploaded successfully!',
+  'teacher.saveError': 'Could not save the text. Please try again.',
+  'teacher.selectFileError': 'Please select a file and provide a title.',
+  'teacher.fileReady': 'File ready for upload.',
+  'teacher.uploadError': 'File upload failed.',
+  'teacher.videoFieldsError': 'Please provide both a title and URL.',
+  'teacher.videoAdded': 'Video link added!',
+  'teacher.manageClassroom': 'Manage classroom',
+  'teacher.code': 'Code',
 
   // Settings
   'settings.title': 'Settings',
@@ -134,14 +142,28 @@ export const DEFAULT_STRINGS = {
   // Calendar
   'calendar.title': 'Calendar',
   'calendar.subtitle': 'Keep track of your schedule',
-  'calendar.comingSoon': 'Calendar coming soon',
-  'calendar.underDev': 'This feature is currently under development.',
+  'calendar.prev': 'Prev',
+  'calendar.next': 'Next',
+  'calendar.upcoming': 'Recent Activity',
+  'calendar.noUpcoming': 'No recent activity from your classes.',
 
-  // Notes
-  'notes.title': 'Notes',
-  'notes.subtitle': 'Your personal notes',
-  'notes.comingSoon': 'Notes coming soon',
-  'notes.underDev': 'This feature is currently under development.',
+  // Classes
+  'classes.title': 'Classes',
+  'classes.teacherSubtitle': 'Manage your classrooms',
+  'classes.studentSubtitle': 'Browse and join available classes',
+  'classes.newClassName': 'New class name...',
+  'classes.noClasses': 'No classes yet.',
+  'classes.copyCode': 'Copy classroom code',
+  'classes.classCreated': 'Classroom created!',
+  'classes.createError': 'Could not create classroom.',
+  'classes.searchPlaceholder': 'Search by name or code...',
+  'classes.myClasses': 'My Classes',
+  'classes.allClasses': 'All Available Classes',
+  'classes.searchResults': 'Search Results',
+  'classes.noResults': 'No classes found.',
+  'classes.joined': 'Joined',
+  'classes.joinedSuccess': 'Joined successfully!',
+  'classes.joinError': 'Could not join classroom.',
 
   // Courses
   'courses.title': 'My Courses',

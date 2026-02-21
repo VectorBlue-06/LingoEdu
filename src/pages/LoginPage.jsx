@@ -92,9 +92,15 @@ export function LoginPage() {
           overflow: 'hidden',
           position: 'relative',
           zIndex: 1,
+          animation: 'slideUp 0.5s ease-out both',
           ...(effectsEnabled && {
-            backdropFilter: 'blur(10px)',
-            bgcolor: 'rgba(255,255,255,0.85)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            bgcolor: 'rgba(255,255,255,0.60)',
+            border: '1px solid rgba(255,255,255,0.45)',
+            boxShadow: '0 8px 32px rgba(118, 75, 162, 0.25)',
+          }),
+          ...(!effectsEnabled && {
+            bgcolor: 'rgba(255,255,255,0.95)',
           }),
         }}
       >
@@ -207,6 +213,8 @@ export function LoginPage() {
                       sx={{
                         '& .MuiOutlinedInput-root': { borderRadius: 2 },
                         '& .MuiInputLabel-root': { color: '#5a4478' },
+                        '& .Mui-disabled': { WebkitTextFillColor: '#7a6a94' },
+                        '& .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(118, 75, 162, 0.3)' },
                       }}
                     />
                   </Tooltip>
@@ -239,22 +247,16 @@ export function LoginPage() {
                       sx={{
                         '& .MuiOutlinedInput-root': { borderRadius: 2 },
                         '& .MuiInputLabel-root': { color: '#5a4478' },
+                        '& .Mui-disabled': { WebkitTextFillColor: '#7a6a94' },
+                        '& .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(118, 75, 162, 0.3)' },
                       }}
                     />
                   </Tooltip>
 
-                  {/* Checkboxes */}
-                  <FormControlLabel
-                    control={<Checkbox size="small" disabled />}
-                    label={
-                      <Typography variant="caption" sx={{ color: '#5a4478' }}>
-                        {t('login.privacy')}
-                      </Typography>
-                    }
-                  />
+                  {/* Teacher certification checkbox */}
                   {role === 'teacher' && (
                     <FormControlLabel
-                      control={<Checkbox size="small" disabled />}
+                      control={<Checkbox size="small" disabled sx={{ color: '#764ba2' }} />}
                       label={
                         <Typography variant="caption" sx={{ color: '#5a4478' }}>
                           {t('login.certify')}
@@ -306,22 +308,22 @@ export function LoginPage() {
                   <Stack direction="row" justifyContent="center" spacing={2}>
                     <Tooltip title={t('login.comingSoonFeature')} arrow>
                       <span>
-                        <IconButton disabled sx={{ border: 1, borderColor: 'divider' }}>
-                          <GoogleIcon />
+                        <IconButton disabled sx={{ border: 1, borderColor: 'rgba(118, 75, 162, 0.3)' }}>
+                          <GoogleIcon sx={{ color: '#764ba2' }} />
                         </IconButton>
                       </span>
                     </Tooltip>
                     <Tooltip title={t('login.comingSoonFeature')} arrow>
                       <span>
-                        <IconButton disabled sx={{ border: 1, borderColor: 'divider' }}>
-                          <FacebookIcon />
+                        <IconButton disabled sx={{ border: 1, borderColor: 'rgba(118, 75, 162, 0.3)' }}>
+                          <FacebookIcon sx={{ color: '#764ba2' }} />
                         </IconButton>
                       </span>
                     </Tooltip>
                     <Tooltip title={t('login.comingSoonFeature')} arrow>
                       <span>
-                        <IconButton disabled sx={{ border: 1, borderColor: 'divider' }}>
-                          <GroupsIcon />
+                        <IconButton disabled sx={{ border: 1, borderColor: 'rgba(118, 75, 162, 0.3)' }}>
+                          <GroupsIcon sx={{ color: '#764ba2' }} />
                         </IconButton>
                       </span>
                     </Tooltip>

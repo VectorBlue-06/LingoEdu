@@ -4,7 +4,7 @@ import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import ExploreIcon from '@mui/icons-material/Explore'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
-import NoteAltIcon from '@mui/icons-material/NoteAlt'
+import ClassIcon from '@mui/icons-material/Class'
 import SettingsIcon from '@mui/icons-material/Settings'
 import {
     Box,
@@ -45,7 +45,7 @@ export function Sidebar() {
             ],
         },
         { label: t('nav.calendar'), englishLabel: tOriginal('nav.calendar'), icon: <CalendarMonthIcon />, path: '/calendar' },
-        { label: t('nav.notes'), englishLabel: tOriginal('nav.notes'), icon: <NoteAltIcon />, path: '/notes' },
+        { label: t('nav.classes'), englishLabel: tOriginal('nav.classes'), icon: <ClassIcon />, path: '/classes' },
     ]
 
     const bottomItems = [

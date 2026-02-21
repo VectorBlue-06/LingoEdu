@@ -1,6 +1,8 @@
 import ClassIcon from '@mui/icons-material/Class'
+import HistoryIcon from '@mui/icons-material/History'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import LoginIcon from '@mui/icons-material/Login'
+import MenuBookIcon from '@mui/icons-material/MenuBook'
 import TranslateIcon from '@mui/icons-material/Translate'
 import {
   Alert,
@@ -21,79 +23,96 @@ import {
 import { useEffect, useState } from 'react'
 import { TopBar } from '../components/TopBar'
 import { useUser } from '../context/UserContext'
+import { useI18n } from '../context/I18nContext'
 import { getTextById, listTexts } from '../lib/textsApi'
+import { joinClassroom, leaveClassroom, listJoinedClassrooms } from '../lib/classroomsApi'
 import { translateText } from '../lib/translationApi'
 import { LANGUAGES } from '../lib/languages'
 
-/* ── Classroom join helpers (localStorage) ── */
-
-function loadJoinedRooms(studentName) {
-  try {
-    const stored = localStorage.getItem(`tb-joined-rooms-${studentName}`)
-    return stored ? JSON.parse(stored) : []
-  } catch {
-    return []
-  }
-}
-
-function saveJoinedRooms(studentName, rooms) {
-  try {
-    localStorage.setItem(`tb-joined-rooms-${studentName}`, JSON.stringify(rooms))
-  } catch {
-    /* ignore */
-  }
-}
-
 export function StudentDashboard() {
   const { user } = useUser()
-  const [texts, setTexts] = useState([])
-  const [selectedId, setSelectedId] = useState('')
+  const { t } = useI18n()
   const [selectedText, setSelectedText] = useState(null)
   const [targetLanguage, setTargetLanguage] = useState(LANGUAGES[0])
   const [translation, setTranslation] = useState('')
   const [fromCache, setFromCache] = useState(false)
-  const [loadingList, setLoadingList] = useState(false)
   const [loadingText, setLoadingText] = useState(false)
   const [loadingTranslate, setLoadingTranslate] = useState(false)
   const [error, setError] = useState(null)
 
-  // Classroom join
+  // Classroom (Supabase)
   const [classroomCode, setClassroomCode] = useState('')
-  const [joinedRooms, setJoinedRooms] = useState(() => loadJoinedRooms(user?.name))
+  const [joinedRooms, setJoinedRooms] = useState([]) // full classroom objects
+  const [roomsLoading, setRoomsLoading] = useState(false)
+  const [activeRoom, setActiveRoom] = useState(null) // currently viewed room object
+  const [roomTexts, setRoomTexts] = useState([])
+  const [loadingRoomTexts, setLoadingRoomTexts] = useState(false)
 
+  // Load joined classrooms from Supabase
   useEffect(() => {
-    if (user?.name) saveJoinedRooms(user.name, joinedRooms)
-  }, [joinedRooms, user?.name])
+    if (!user?.name) return
+    ;(async () => {
+      setRoomsLoading(true)
+      try {
+        const data = await listJoinedClassrooms(user.name)
+        setJoinedRooms(data)
+      } catch (err) {
+        console.error('Failed to load joined classrooms:', err)
+      } finally {
+        setRoomsLoading(false)
+      }
+    })()
+  }, [user?.name])
 
-  const handleJoinClassroom = () => {
+  const handleJoinClassroom = async () => {
     const code = classroomCode.trim().toUpperCase()
     if (!code) return
-    if (joinedRooms.includes(code)) {
-      setError('You have already joined this classroom.')
+    if (joinedRooms.some((r) => r.code === code)) {
+      setError(t('student.alreadyJoined'))
       return
     }
-    setJoinedRooms((prev) => [...prev, code])
-    setClassroomCode('')
-  }
-
-  const loadTexts = async () => {
-    setLoadingList(true)
     try {
-      const data = await listTexts()
-      setTexts(data)
+      await joinClassroom({ classroom_code: code, student_name: user?.name })
+      // Reload joined rooms to get the full classroom data
+      const data = await listJoinedClassrooms(user.name)
+      setJoinedRooms(data)
+      setClassroomCode('')
     } catch (err) {
-      console.error(err)
-    } finally {
-      setLoadingList(false)
+      console.error('Failed to join classroom:', err)
+      setError('Could not join classroom. Check the code and try again.')
     }
   }
 
+  const handleLeaveClassroom = async (code) => {
+    try {
+      await leaveClassroom({ classroom_code: code, student_name: user?.name })
+      setJoinedRooms((prev) => prev.filter((r) => r.code !== code))
+      if (activeRoom?.code === code) setActiveRoom(null)
+    } catch (err) {
+      console.error('Failed to leave classroom:', err)
+    }
+  }
+
+  // Load texts when entering a classroom
   useEffect(() => {
-    loadTexts()
-  }, [])
+    if (!activeRoom) {
+      setRoomTexts([])
+      return
+    }
+    ;(async () => {
+      setLoadingRoomTexts(true)
+      try {
+        const data = await listTexts(activeRoom.code)
+        setRoomTexts(data)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoadingRoomTexts(false)
+      }
+    })()
+  }, [activeRoom])
 
   const handleSelectText = async (id) => {
-    setSelectedId(id)
     if (!id) {
       setSelectedText(null)
       setTranslation('')
@@ -111,7 +130,7 @@ export function StudentDashboard() {
       setTargetLanguage(LANGUAGES[0])
     } catch (err) {
       console.error(err)
-      setError('Could not load the selected text.')
+      setError(t('student.loadError'))
     } finally {
       setLoadingText(false)
     }
@@ -133,33 +152,53 @@ export function StudentDashboard() {
       setFromCache(Boolean(data?.fromCache))
     } catch (err) {
       console.error(err)
-      setError('Translation failed. Please try again.')
+      setError(t('student.translateError'))
     } finally {
       setLoadingTranslate(false)
     }
   }
 
-  // Last viewed text
-  const lastText = texts.length > 0 ? texts[0] : null
-
   return (
-    <Box>
-      <TopBar
-        title={`Welcome, ${user?.name || 'Student'}!`}
-        subtitle="Choose a text, then translate it into a language you are learning."
-      />
+    <Box className="page-enter">
+      <TopBar title={`${t('student.welcome')}, ${user?.name || 'Student'}!`} />
+
+      {/* ── Info cards: current course & last class ── */}
+      {!selectedText && !activeRoom && (
+        <Grid container spacing={2} sx={{ mb: 3, px: 1 }}>
+          <Grid item xs={12} sm={6}>
+            <Card variant="outlined" className="card-enter" sx={{ borderRadius: 2 }}>
+              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+                <MenuBookIcon sx={{ fontSize: 32, color: 'primary.main', mb: 0.5 }} />
+                <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                  {joinedRooms.length}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {t('student.joinedRooms')}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Card variant="outlined" className="card-enter" sx={{ borderRadius: 2, animationDelay: '0.08s' }}>
+              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+                <HistoryIcon sx={{ fontSize: 32, color: 'secondary.main', mb: 0.5 }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mt: 0.5 }}>
+                  {selectedText ? selectedText.title : t('student.noRecentCourse')}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {t('student.lastViewed')}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      )}
 
       {/* ── Join Classroom ── */}
-      {!selectedText && (
+      {!selectedText && !activeRoom && (
         <Paper
-          sx={{
-            p: 2.5,
-            mb: 3,
-            mx: 1,
-            borderRadius: 2,
-            bgcolor: (theme) =>
-              theme.palette.mode === 'light' ? '#fafcff' : '#1a1a2a',
-          }}
+          className="card-enter"
+          sx={{ p: 2.5, mb: 3, mx: 1, borderRadius: 2 }}
         >
           <Typography
             variant="subtitle2"
@@ -172,12 +211,12 @@ export function StudentDashboard() {
               color: 'text.primary',
             }}
           >
-            <ClassIcon fontSize="small" color="primary" /> Join Classroom
+            <ClassIcon fontSize="small" color="primary" /> {t('student.joinClassroom')}
           </Typography>
           <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
             <TextField
               size="small"
-              placeholder="Enter classroom code"
+              placeholder={t('student.classroomCode')}
               value={classroomCode}
               onChange={(e) => setClassroomCode(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleJoinClassroom()}
@@ -191,83 +230,110 @@ export function StudentDashboard() {
               startIcon={<LoginIcon />}
               sx={{ borderRadius: 2 }}
             >
-              Join
+              {t('student.join')}
             </Button>
           </Stack>
-          {joinedRooms.length > 0 && (
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-              {joinedRooms.map((code) => (
-                <Chip
-                  key={code}
-                  label={code}
-                  size="small"
-                  variant="outlined"
-                  color="primary"
-                  onDelete={() =>
-                    setJoinedRooms((prev) => prev.filter((c) => c !== code))
-                  }
-                />
-              ))}
-            </Stack>
+
+          {error && !activeRoom && (
+            <Alert severity="error" sx={{ mb: 1.5 }} onClose={() => setError(null)}>
+              {error}
+            </Alert>
+          )}
+
+          {/* Joined classrooms */}
+          {roomsLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : joinedRooms.length > 0 ? (
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                {t('student.joinedRooms')}
+              </Typography>
+              <Grid container spacing={1.5}>
+                {joinedRooms.map((room) => (
+                  <Grid item xs={12} sm={6} md={4} key={room.code}>
+                    <Card
+                      variant="outlined"
+                      className="card-enter"
+                      sx={{
+                        borderRadius: 2,
+                        transition: 'transform 0.2s, box-shadow 0.2s',
+                        '&:hover': { transform: 'translateY(-2px)', boxShadow: 4 },
+                      }}
+                    >
+                      <CardActionArea onClick={() => setActiveRoom(room)}>
+                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.5 }}>
+                          <ClassIcon color="primary" />
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                              {room.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              by {room.teacher_name} · {room.code}
+                            </Typography>
+                          </Box>
+                        </CardContent>
+                      </CardActionArea>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+              {t('student.noRooms')}
+            </Typography>
           )}
         </Paper>
       )}
 
-      {/* Last course / quick access */}
-      {lastText && !selectedText && (
-        <Paper sx={{ p: 2.5, mb: 3, mx: 1, borderRadius: 2 }}>
-          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-            My Last Course
-          </Typography>
-          <Card
-            variant="outlined"
-            sx={{
-              borderRadius: 2,
-              transition: 'box-shadow 0.2s',
-              '&:hover': { boxShadow: 3 },
-            }}
-          >
-            <CardActionArea onClick={() => handleSelectText(lastText.id)}>
-              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <LibraryBooksIcon sx={{ fontSize: 36, color: 'primary.main' }} />
-                <Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                    {lastText.title}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Language: {lastText.language}
-                  </Typography>
-                </Box>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Paper>
-      )}
+      {/* ── Inside a classroom: text list ── */}
+      {activeRoom && !selectedText && (
+        <Box className="page-enter" sx={{ px: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+            <Button size="small" onClick={() => setActiveRoom(null)} sx={{ borderRadius: 2 }}>
+              {t('common.back')}
+            </Button>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <ClassIcon color="primary" fontSize="small" />
+              {activeRoom.name}
+              <Chip label={activeRoom.code} size="small" variant="outlined" sx={{ fontFamily: 'monospace' }} />
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              by {activeRoom.teacher_name}
+            </Typography>
+            <Chip
+              label={t('student.leave')}
+              size="small"
+              color="error"
+              variant="outlined"
+              onDelete={() => handleLeaveClassroom(activeRoom.code)}
+            />
+          </Stack>
 
-      {/* Available courses grid */}
-      {!selectedText && (
-        <Box sx={{ px: 1, mb: 3 }}>
-          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>
-            Courses I Have Joined
-          </Typography>
-          {loadingList ? (
+          {loadingRoomTexts ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress size={28} />
             </Box>
-          ) : texts.length === 0 ? (
-            <Typography variant="body2" color="text.disabled" textAlign="center" sx={{ py: 4 }}>
-              No courses available yet.
-            </Typography>
+          ) : roomTexts.length === 0 ? (
+            <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}>
+              <LibraryBooksIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+              <Typography variant="body2" color="text.secondary">
+                {t('student.noCourses')}
+              </Typography>
+            </Paper>
           ) : (
             <Grid container spacing={2}>
-              {texts.map((text) => (
+              {roomTexts.map((text) => (
                 <Grid item xs={12} sm={6} md={4} key={text.id}>
                   <Card
                     variant="outlined"
+                    className="card-enter"
                     sx={{
                       borderRadius: 2,
-                      transition: 'box-shadow 0.2s',
-                      '&:hover': { boxShadow: 4 },
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                      '&:hover': { transform: 'translateY(-2px)', boxShadow: 4 },
                     }}
                   >
                     <CardActionArea onClick={() => handleSelectText(text.id)}>
@@ -276,10 +342,7 @@ export function StudentDashboard() {
                           {text.title}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          Language: {text.language}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" noWrap sx={{ mt: 0.5 }}>
-                          {text.content}
+                          {text.language}{text.created_by ? ` · by ${text.created_by}` : ''}
                         </Typography>
                       </CardContent>
                     </CardActionArea>
@@ -291,9 +354,9 @@ export function StudentDashboard() {
         </Box>
       )}
 
-      {/* Selected text detail & translate */}
+      {/* ── Selected text: translate ── */}
       {selectedText && (
-        <Paper sx={{ p: 3, mx: 1, borderRadius: 2 }}>
+        <Paper className="card-enter" sx={{ p: 3, mx: 1, borderRadius: 2 }}>
           <Stack spacing={2}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
@@ -304,18 +367,18 @@ export function StudentDashboard() {
                 variant="text"
                 onClick={() => {
                   setSelectedText(null)
-                  setSelectedId('')
                   setTranslation('')
                 }}
+                sx={{ borderRadius: 2 }}
               >
-                ← Back
+                {t('common.back')}
               </Button>
             </Box>
             <Typography variant="caption" color="text.secondary">
-              Source language: {selectedText.language}
+              {t('student.sourceLang')}: {selectedText.language}
             </Typography>
             <TextField
-              label="Original content"
+              label={t('student.original')}
               value={selectedText.content}
               multiline
               minRows={4}
@@ -332,21 +395,10 @@ export function StudentDashboard() {
                 options={LANGUAGES}
                 getOptionLabel={(option) => option.label}
                 value={targetLanguage}
-                onChange={(_, newValue) => {
-                  if (newValue) setTargetLanguage(newValue)
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Target language"
-                    size="small"
-                  />
-                )}
+                onChange={(_, v) => { if (v) setTargetLanguage(v) }}
+                renderInput={(params) => <TextField {...params} label={t('student.targetLang')} size="small" />}
                 disableClearable
-                sx={{
-                  minWidth: 250,
-                  '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                }}
+                sx={{ minWidth: 250, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
               <Button
                 variant="contained"
@@ -355,7 +407,7 @@ export function StudentDashboard() {
                 startIcon={<TranslateIcon />}
                 sx={{ borderRadius: 2 }}
               >
-                {loadingTranslate ? 'Translating…' : 'Translate'}
+                {loadingTranslate ? t('student.translating') : t('student.translate')}
               </Button>
             </Stack>
 
@@ -365,10 +417,10 @@ export function StudentDashboard() {
               <Box>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
                   <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                    Translated text
+                    {t('student.translated')}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {fromCache ? '(from cache)' : '(new translation)'}
+                    {fromCache ? t('student.fromCache') : t('student.newTranslation')}
                   </Typography>
                 </Stack>
                 <TextField

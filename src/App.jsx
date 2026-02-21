@@ -9,7 +9,7 @@ import { UserProvider, useUser } from './context/UserContext'
 import { CalendarPage } from './pages/CalendarPage'
 import { CoursesPage } from './pages/CoursesPage'
 import { LoginPage } from './pages/LoginPage'
-import { NotesPage } from './pages/NotesPage'
+import { ClassesPage } from './pages/ClassesPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { StudentDashboard } from './pages/StudentDashboard'
 import { TeacherDashboard } from './pages/TeacherDashboard'
@@ -160,10 +160,10 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/notes"
+          path="/classes"
           element={
             <RequireAuth>
-              <NotesPage />
+              <ClassesPage />
             </RequireAuth>
           }
         />

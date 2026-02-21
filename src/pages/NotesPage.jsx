@@ -1,11 +1,13 @@
 import NoteAltIcon from '@mui/icons-material/NoteAlt'
 import { Box, Typography } from '@mui/material'
 import { TopBar } from '../components/TopBar'
+import { useI18n } from '../context/I18nContext'
 
 export function NotesPage() {
+    const { t } = useI18n()
     return (
-        <Box>
-            <TopBar title="Notes" subtitle="Your personal notes" />
+        <Box className="page-enter">
+            <TopBar title={t('notes.title')} subtitle={t('notes.subtitle')} />
             <Box
                 sx={{
                     display: 'flex',
@@ -18,10 +20,10 @@ export function NotesPage() {
             >
                 <NoteAltIcon sx={{ fontSize: 72, color: 'text.disabled' }} />
                 <Typography variant="h6" color="text.secondary">
-                    Notes coming soon
+                    {t('notes.comingSoon')}
                 </Typography>
                 <Typography variant="body2" color="text.disabled">
-                    This feature is currently under development.
+                    {t('notes.underDev')}
                 </Typography>
             </Box>
         </Box>
