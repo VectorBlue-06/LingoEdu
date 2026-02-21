@@ -6,7 +6,6 @@ import ExploreIcon from '@mui/icons-material/Explore'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import NoteAltIcon from '@mui/icons-material/NoteAlt'
 import SettingsIcon from '@mui/icons-material/Settings'
-import PersonIcon from '@mui/icons-material/Person'
 import {
     Box,
     Collapse,
@@ -21,6 +20,7 @@ import {
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useUser } from '../context/UserContext'
+import { useI18n } from '../context/I18nContext'
 
 const DRAWER_WIDTH = 240
 
@@ -28,27 +28,28 @@ export function Sidebar() {
     const navigate = useNavigate()
     const location = useLocation()
     const { user } = useUser()
+    const { t, tOriginal, isTranslated } = useI18n()
     const [coursesOpen, setCoursesOpen] = useState(false)
 
     const dashboardPath = user?.role === 'teacher' ? '/teacher' : '/student'
 
     const navItems = [
-        { label: 'Dashboard', icon: <DashboardIcon />, path: dashboardPath },
+        { label: t('nav.dashboard'), englishLabel: tOriginal('nav.dashboard'), icon: <DashboardIcon />, path: dashboardPath },
         {
-            label: 'My Courses',
+            label: t('nav.courses'),
+            englishLabel: tOriginal('nav.courses'),
             icon: <LibraryBooksIcon />,
             expandable: true,
             children: [
-                { label: 'All Courses', path: '/courses' },
+                { label: t('nav.allCourses'), englishLabel: tOriginal('nav.allCourses'), path: '/courses' },
             ],
         },
-        { label: 'Calendar', icon: <CalendarMonthIcon />, path: '/calendar' },
-        { label: 'Notes', icon: <NoteAltIcon />, path: '/notes' },
+        { label: t('nav.calendar'), englishLabel: tOriginal('nav.calendar'), icon: <CalendarMonthIcon />, path: '/calendar' },
+        { label: t('nav.notes'), englishLabel: tOriginal('nav.notes'), icon: <NoteAltIcon />, path: '/notes' },
     ]
 
     const bottomItems = [
-        { label: 'Settings', icon: <SettingsIcon />, path: '/settings' },
-        { label: 'Account', icon: <PersonIcon />, path: '/account' },
+        { label: t('nav.settings'), englishLabel: tOriginal('nav.settings'), icon: <SettingsIcon />, path: '/settings' },
     ]
 
     const isActive = (path) => location.pathname === path
@@ -87,7 +88,7 @@ export function Sidebar() {
                     TB
                 </Box>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, letterSpacing: 0.5 }}>
-                    Text Bridge
+                    {t('app.name')}
                 </Typography>
             </Box>
 
@@ -100,6 +101,7 @@ export function Sidebar() {
                         <Box key={item.label}>
                             <ListItemButton
                                 onClick={() => setCoursesOpen(!coursesOpen)}
+                                title={isTranslated ? item.englishLabel : undefined}
                                 sx={{
                                     mx: 1,
                                     borderRadius: 2,
@@ -127,6 +129,7 @@ export function Sidebar() {
                                             key={child.label}
                                             onClick={() => navigate(child.path)}
                                             selected={isActive(child.path)}
+                                            title={isTranslated ? child.englishLabel : undefined}
                                             sx={{
                                                 pl: 7,
                                                 mx: 1,
@@ -154,6 +157,7 @@ export function Sidebar() {
                             key={item.label}
                             onClick={() => navigate(item.path)}
                             selected={isActive(item.path)}
+                            title={isTranslated ? item.englishLabel : undefined}
                             sx={{
                                 mx: 1,
                                 borderRadius: 2,
@@ -187,6 +191,7 @@ export function Sidebar() {
                         key={item.label}
                         onClick={() => navigate(item.path)}
                         selected={isActive(item.path)}
+                        title={isTranslated ? item.englishLabel : undefined}
                         sx={{
                             mx: 1,
                             borderRadius: 2,

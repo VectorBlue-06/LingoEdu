@@ -5,18 +5,15 @@ const STORAGE_KEY = 'lingo-user'
 const UserContext = createContext(null)
 
 export function UserProvider({ children }) {
-  const [user, setUser] = useState(null)
-
-  useEffect(() => {
+  // Synchronous init — prevents flash-of-login on refresh
+  const [user, setUser] = useState(() => {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        setUser(JSON.parse(stored))
-      }
+      return stored ? JSON.parse(stored) : null
     } catch {
-      // ignore
+      return null
     }
-  }, [])
+  })
 
   useEffect(() => {
     try {

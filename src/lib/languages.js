@@ -1,0 +1,42 @@
+export const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Spanish (Español)' },
+  { code: 'fr', label: 'French (Français)' },
+  { code: 'de', label: 'German (Deutsch)' },
+  { code: 'it', label: 'Italian (Italiano)' },
+  { code: 'pt', label: 'Portuguese (Português)' },
+  { code: 'ru', label: 'Russian (Русский)' },
+  { code: 'zh', label: 'Chinese Simplified (简体中文)' },
+  { code: 'zh-TW', label: 'Chinese Traditional (繁體中文)' },
+  { code: 'ja', label: 'Japanese (日本語)' },
+  { code: 'ko', label: 'Korean (한국어)' },
+  { code: 'ar', label: 'Arabic (العربية)' },
+  { code: 'hi', label: 'Hindi (हिन्दी)' },
+  { code: 'bn', label: 'Bengali (বাংলা)' },
+  { code: 'ur', label: 'Urdu (اردو)' },
+  { code: 'tr', label: 'Turkish (Türkçe)' },
+  { code: 'vi', label: 'Vietnamese (Tiếng Việt)' },
+  { code: 'th', label: 'Thai (ไทย)' },
+  { code: 'nl', label: 'Dutch (Nederlands)' },
+  { code: 'pl', label: 'Polish (Polski)' },
+  { code: 'sv', label: 'Swedish (Svenska)' },
+  { code: 'no', label: 'Norwegian (Norsk)' },
+  { code: 'da', label: 'Danish (Dansk)' },
+  { code: 'fi', label: 'Finnish (Suomi)' },
+  { code: 'el', label: 'Greek (Ελληνικά)' },
+  { code: 'cs', label: 'Czech (Čeština)' },
+  { code: 'ro', label: 'Romanian (Română)' },
+  { code: 'hu', label: 'Hungarian (Magyar)' },
+  { code: 'id', label: 'Indonesian (Bahasa Indonesia)' },
+  { code: 'ms', label: 'Malay (Bahasa Melayu)' },
+  { code: 'tl', label: 'Filipino (Tagalog)' },
+  { code: 'sw', label: 'Swahili (Kiswahili)' },
+  { code: 'he', label: 'Hebrew (עברית)' },
+  { code: 'fa', label: 'Persian (فارسی)' },
+  { code: 'uk', label: 'Ukrainian (Українська)' },
+]
+
+export function getLanguageLabel(code) {
+  const lang = LANGUAGES.find((l) => l.code === code)
+  return lang ? lang.label : code
+}

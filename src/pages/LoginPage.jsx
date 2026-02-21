@@ -1,9 +1,8 @@
 import FacebookIcon from '@mui/icons-material/Facebook'
 import GoogleIcon from '@mui/icons-material/Google'
 import GroupsIcon from '@mui/icons-material/Groups'
-import VisibilityReduceIcon from '@mui/icons-material/VisibilityOff'
-import VisibilityIcon from '@mui/icons-material/Visibility'
 import {
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -12,7 +11,6 @@ import {
   Divider,
   FormControl,
   FormControlLabel,
-  FormLabel,
   IconButton,
   Radio,
   RadioGroup,
@@ -25,14 +23,19 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUser } from '../context/UserContext'
 import { useThemeMode } from '../context/ThemeContext'
+import { useI18n } from '../context/I18nContext'
+import { LANGUAGES } from '../lib/languages'
 
 export function LoginPage() {
   const { login } = useUser()
-  const { effectsEnabled, toggleEffects } = useThemeMode()
+  const { effectsEnabled } = useThemeMode()
+  const { locale, setLocale, t, tOriginal, isTranslated } = useI18n()
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [role, setRole] = useState('')
   const [touched, setTouched] = useState(false)
+
+  const selectedLang = LANGUAGES.find((l) => l.code === locale) || LANGUAGES[0]
 
   const handleSubmit = (event) => {
     event.preventDefault()
@@ -120,8 +123,9 @@ export function LoginPage() {
               <Typography
                 variant="body2"
                 sx={{ color: '#764ba2', textAlign: 'center', fontWeight: 500 }}
+                title={isTranslated ? tOriginal('login.connect') : undefined}
               >
-                Connect. Learn. Grow.
+                {t('login.connect')}
               </Typography>
             </Box>
 
@@ -130,12 +134,15 @@ export function LoginPage() {
               <Typography
                 variant="h4"
                 component="h1"
-                sx={{ fontWeight: 700, mb: 0.5, color: '#333' }}
+                sx={{ fontWeight: 700, mb: 0.5, color: '#2d1b4e' }}
+                title={isTranslated ? tOriginal('login.title') : undefined}
               >
-                Get Started Now
+                {t('login.title')}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                It's free to join and gain full access to exciting learning opportunities.
+              <Typography variant="body2" sx={{ mb: 3, color: '#555' }}
+                title={isTranslated ? tOriginal('login.subtitle') : undefined}
+              >
+                {t('login.subtitle')}
               </Typography>
 
               {/* Role selection */}
@@ -144,64 +151,104 @@ export function LoginPage() {
                   <FormControlLabel
                     value="teacher"
                     control={<Radio size="small" />}
-                    label="I'm a Teacher"
-                    sx={{ '& .MuiTypography-root': { fontSize: 14 } }}
+                    label={t('login.teacher')}
+                    title={isTranslated ? tOriginal('login.teacher') : undefined}
+                    sx={{ '& .MuiTypography-root': { fontSize: 14, color: '#3d2a5c' } }}
                   />
                   <FormControlLabel
                     value="student"
                     control={<Radio size="small" />}
-                    label="I'm a Student"
-                    sx={{ '& .MuiTypography-root': { fontSize: 14 } }}
+                    label={t('login.student')}
+                    title={isTranslated ? tOriginal('login.student') : undefined}
+                    sx={{ '& .MuiTypography-root': { fontSize: 14, color: '#3d2a5c' } }}
                   />
                 </RadioGroup>
                 {roleError && (
                   <Typography variant="caption" color="error">
-                    Please select a role.
+                    {t('login.selectRole')}
                   </Typography>
                 )}
               </FormControl>
 
               <Box component="form" onSubmit={handleSubmit} noValidate>
                 <Stack spacing={2}>
-                  {/* Email placeholder */}
-                  <TextField
-                    fullWidth
-                    label="Email Address"
+                  {/* Interface language selector */}
+                  <Autocomplete
+                    options={LANGUAGES}
+                    getOptionLabel={(option) => option.label}
+                    value={selectedLang}
+                    onChange={(_, newValue) => {
+                      if (newValue) setLocale(newValue.code)
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label={t('login.uiLanguage')}
+                        size="small"
+                        sx={{
+                          '& .MuiOutlinedInput-root': { borderRadius: 2 },
+                          '& .MuiInputBase-input': { color: '#2d1b4e' },
+                          '& .MuiInputLabel-root': { color: '#5a4478' },
+                        }}
+                      />
+                    )}
+                    disableClearable
                     size="small"
-                    disabled
-                    placeholder="Coming soon"
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
+
+                  {/* Email placeholder */}
+                  <Tooltip title={t('login.comingSoonFeature')} placement="top" arrow>
+                    <TextField
+                      fullWidth
+                      label={t('login.email')}
+                      size="small"
+                      disabled
+                      placeholder={t('common.comingSoon')}
+                      sx={{
+                        '& .MuiOutlinedInput-root': { borderRadius: 2 },
+                        '& .MuiInputLabel-root': { color: '#5a4478' },
+                      }}
+                    />
+                  </Tooltip>
 
                   {/* Name - functional */}
                   <TextField
                     fullWidth
-                    label="Name"
+                    label={t('login.name')}
                     size="small"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     error={nameError}
-                    helperText={nameError ? 'Name is required' : ''}
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    helperText={nameError ? t('login.nameRequired') : ''}
+                    sx={{
+                      '& .MuiOutlinedInput-root': { borderRadius: 2 },
+                      '& .MuiInputBase-input': { color: '#2d1b4e' },
+                      '& .MuiInputLabel-root': { color: '#5a4478' },
+                    }}
                   />
 
                   {/* Password placeholder */}
-                  <TextField
-                    fullWidth
-                    label="Password"
-                    type="password"
-                    size="small"
-                    disabled
-                    placeholder="Coming soon"
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                  />
+                  <Tooltip title={t('login.comingSoonFeature')} placement="top" arrow>
+                    <TextField
+                      fullWidth
+                      label={t('login.password')}
+                      type="password"
+                      size="small"
+                      disabled
+                      placeholder={t('common.comingSoon')}
+                      sx={{
+                        '& .MuiOutlinedInput-root': { borderRadius: 2 },
+                        '& .MuiInputLabel-root': { color: '#5a4478' },
+                      }}
+                    />
+                  </Tooltip>
 
                   {/* Checkboxes */}
                   <FormControlLabel
                     control={<Checkbox size="small" disabled />}
                     label={
-                      <Typography variant="caption" color="text.secondary">
-                        I agree to the website's Privacy Policy & Terms and Conditions.
+                      <Typography variant="caption" sx={{ color: '#5a4478' }}>
+                        {t('login.privacy')}
                       </Typography>
                     }
                   />
@@ -209,8 +256,8 @@ export function LoginPage() {
                     <FormControlLabel
                       control={<Checkbox size="small" disabled />}
                       label={
-                        <Typography variant="caption" color="text.secondary">
-                          I certify that I am an accredited Teacher.
+                        <Typography variant="caption" sx={{ color: '#5a4478' }}>
+                          {t('login.certify')}
                         </Typography>
                       }
                     />
@@ -232,38 +279,52 @@ export function LoginPage() {
                       },
                     }}
                   >
-                    Continue
+                    {t('login.continue')}
                   </Button>
 
                   {/* Sign in link placeholder */}
-                  <Typography variant="body2" color="text.secondary" textAlign="center">
-                    Already have an account?{' '}
+                  <Typography variant="body2" sx={{ color: '#5a4478' }} textAlign="center"
+                    title={isTranslated ? tOriginal('login.signIn') : undefined}
+                  >
+                    {t('login.signIn')}{' '}
                     <Typography
                       component="span"
                       variant="body2"
                       sx={{ color: '#764ba2', fontWeight: 600, cursor: 'pointer' }}
                     >
-                      Sign In
+                      {t('login.signInLink')}
                     </Typography>{' '}
                     here
                   </Typography>
 
                   {/* Social login placeholders */}
                   <Divider>
-                    <Typography variant="caption" color="text.secondary">
-                      OR Continue With
+                    <Typography variant="caption" sx={{ color: '#5a4478' }}>
+                      {t('login.orContinue')}
                     </Typography>
                   </Divider>
                   <Stack direction="row" justifyContent="center" spacing={2}>
-                    <IconButton disabled sx={{ border: 1, borderColor: 'divider' }}>
-                      <GoogleIcon />
-                    </IconButton>
-                    <IconButton disabled sx={{ border: 1, borderColor: 'divider' }}>
-                      <FacebookIcon />
-                    </IconButton>
-                    <IconButton disabled sx={{ border: 1, borderColor: 'divider' }}>
-                      <GroupsIcon />
-                    </IconButton>
+                    <Tooltip title={t('login.comingSoonFeature')} arrow>
+                      <span>
+                        <IconButton disabled sx={{ border: 1, borderColor: 'divider' }}>
+                          <GoogleIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    <Tooltip title={t('login.comingSoonFeature')} arrow>
+                      <span>
+                        <IconButton disabled sx={{ border: 1, borderColor: 'divider' }}>
+                          <FacebookIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    <Tooltip title={t('login.comingSoonFeature')} arrow>
+                      <span>
+                        <IconButton disabled sx={{ border: 1, borderColor: 'divider' }}>
+                          <GroupsIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
                   </Stack>
                 </Stack>
               </Box>
@@ -271,24 +332,6 @@ export function LoginPage() {
           </Box>
         </CardContent>
       </Card>
-
-      {/* Performance toggle button */}
-      <Tooltip title={effectsEnabled ? 'Disable effects (better performance)' : 'Enable effects'}>
-        <IconButton
-          onClick={toggleEffects}
-          sx={{
-            position: 'fixed',
-            bottom: 20,
-            right: 20,
-            zIndex: 10,
-            bgcolor: 'rgba(255,255,255,0.8)',
-            backdropFilter: 'blur(4px)',
-            '&:hover': { bgcolor: 'rgba(255,255,255,0.95)' },
-          }}
-        >
-          {effectsEnabled ? <VisibilityIcon /> : <VisibilityReduceIcon />}
-        </IconButton>
-      </Tooltip>
     </Box>
   )
 }

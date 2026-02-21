@@ -1,19 +1,19 @@
+import ClassIcon from '@mui/icons-material/Class'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
+import LoginIcon from '@mui/icons-material/Login'
 import TranslateIcon from '@mui/icons-material/Translate'
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Card,
   CardActionArea,
   CardContent,
+  Chip,
   CircularProgress,
-  FormControl,
   Grid,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   TextField,
   Typography,
@@ -23,21 +23,58 @@ import { TopBar } from '../components/TopBar'
 import { useUser } from '../context/UserContext'
 import { getTextById, listTexts } from '../lib/textsApi'
 import { translateText } from '../lib/translationApi'
+import { LANGUAGES } from '../lib/languages'
 
-const TARGET_LANGUAGES = ['en', 'es', 'fr', 'de']
+/* ── Classroom join helpers (localStorage) ── */
+
+function loadJoinedRooms(studentName) {
+  try {
+    const stored = localStorage.getItem(`tb-joined-rooms-${studentName}`)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+function saveJoinedRooms(studentName, rooms) {
+  try {
+    localStorage.setItem(`tb-joined-rooms-${studentName}`, JSON.stringify(rooms))
+  } catch {
+    /* ignore */
+  }
+}
 
 export function StudentDashboard() {
   const { user } = useUser()
   const [texts, setTexts] = useState([])
   const [selectedId, setSelectedId] = useState('')
   const [selectedText, setSelectedText] = useState(null)
-  const [targetLanguage, setTargetLanguage] = useState(TARGET_LANGUAGES[0])
+  const [targetLanguage, setTargetLanguage] = useState(LANGUAGES[0])
   const [translation, setTranslation] = useState('')
   const [fromCache, setFromCache] = useState(false)
   const [loadingList, setLoadingList] = useState(false)
   const [loadingText, setLoadingText] = useState(false)
   const [loadingTranslate, setLoadingTranslate] = useState(false)
   const [error, setError] = useState(null)
+
+  // Classroom join
+  const [classroomCode, setClassroomCode] = useState('')
+  const [joinedRooms, setJoinedRooms] = useState(() => loadJoinedRooms(user?.name))
+
+  useEffect(() => {
+    if (user?.name) saveJoinedRooms(user.name, joinedRooms)
+  }, [joinedRooms, user?.name])
+
+  const handleJoinClassroom = () => {
+    const code = classroomCode.trim().toUpperCase()
+    if (!code) return
+    if (joinedRooms.includes(code)) {
+      setError('You have already joined this classroom.')
+      return
+    }
+    setJoinedRooms((prev) => [...prev, code])
+    setClassroomCode('')
+  }
 
   const loadTexts = async () => {
     setLoadingList(true)
@@ -71,7 +108,7 @@ export function StudentDashboard() {
       setSelectedText(data)
       setTranslation('')
       setFromCache(false)
-      setTargetLanguage(TARGET_LANGUAGES[0])
+      setTargetLanguage(LANGUAGES[0])
     } catch (err) {
       console.error(err)
       setError('Could not load the selected text.')
@@ -90,7 +127,7 @@ export function StudentDashboard() {
         textId: selectedText.id,
         content: selectedText.content,
         sourceLanguage: selectedText.language,
-        targetLanguage,
+        targetLanguage: targetLanguage.code,
       })
       setTranslation(data?.translatedText ?? '')
       setFromCache(Boolean(data?.fromCache))
@@ -112,6 +149,70 @@ export function StudentDashboard() {
         subtitle="Choose a text, then translate it into a language you are learning."
       />
 
+      {/* ── Join Classroom ── */}
+      {!selectedText && (
+        <Paper
+          sx={{
+            p: 2.5,
+            mb: 3,
+            mx: 1,
+            borderRadius: 2,
+            bgcolor: (theme) =>
+              theme.palette.mode === 'light' ? '#fafcff' : '#1a1a2a',
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            sx={{
+              mb: 1.5,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              color: 'text.primary',
+            }}
+          >
+            <ClassIcon fontSize="small" color="primary" /> Join Classroom
+          </Typography>
+          <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
+            <TextField
+              size="small"
+              placeholder="Enter classroom code"
+              value={classroomCode}
+              onChange={(e) => setClassroomCode(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleJoinClassroom()}
+              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleJoinClassroom}
+              disabled={!classroomCode.trim()}
+              startIcon={<LoginIcon />}
+              sx={{ borderRadius: 2 }}
+            >
+              Join
+            </Button>
+          </Stack>
+          {joinedRooms.length > 0 && (
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {joinedRooms.map((code) => (
+                <Chip
+                  key={code}
+                  label={code}
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  onDelete={() =>
+                    setJoinedRooms((prev) => prev.filter((c) => c !== code))
+                  }
+                />
+              ))}
+            </Stack>
+          )}
+        </Paper>
+      )}
+
       {/* Last course / quick access */}
       {lastText && !selectedText && (
         <Paper sx={{ p: 2.5, mb: 3, mx: 1, borderRadius: 2 }}>
@@ -130,7 +231,7 @@ export function StudentDashboard() {
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <LibraryBooksIcon sx={{ fontSize: 36, color: 'primary.main' }} />
                 <Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                     {lastText.title}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
@@ -171,7 +272,7 @@ export function StudentDashboard() {
                   >
                     <CardActionArea onClick={() => handleSelectText(text.id)}>
                       <CardContent>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           {text.title}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
@@ -195,7 +296,7 @@ export function StudentDashboard() {
         <Paper sx={{ p: 3, mx: 1, borderRadius: 2 }}>
           <Stack spacing={2}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
                 {selectedText.title}
               </Typography>
               <Button
@@ -227,22 +328,26 @@ export function StudentDashboard() {
               spacing={2}
               alignItems={{ xs: 'stretch', sm: 'center' }}
             >
-              <FormControl sx={{ minWidth: 160 }} size="small">
-                <InputLabel id="target-lang-label">Target language</InputLabel>
-                <Select
-                  labelId="target-lang-label"
-                  label="Target language"
-                  value={targetLanguage}
-                  onChange={(event) => setTargetLanguage(event.target.value)}
-                  sx={{ borderRadius: 2 }}
-                >
-                  {TARGET_LANGUAGES.map((lang) => (
-                    <MenuItem value={lang} key={lang}>
-                      {lang}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                options={LANGUAGES}
+                getOptionLabel={(option) => option.label}
+                value={targetLanguage}
+                onChange={(_, newValue) => {
+                  if (newValue) setTargetLanguage(newValue)
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Target language"
+                    size="small"
+                  />
+                )}
+                disableClearable
+                sx={{
+                  minWidth: 250,
+                  '& .MuiOutlinedInput-root': { borderRadius: 2 },
+                }}
+              />
               <Button
                 variant="contained"
                 onClick={handleTranslate}
@@ -259,7 +364,9 @@ export function StudentDashboard() {
             {translation && (
               <Box>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                  <Typography variant="subtitle2">Translated text</Typography>
+                  <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
+                    Translated text
+                  </Typography>
                   <Typography variant="caption" color="text.secondary">
                     {fromCache ? '(from cache)' : '(new translation)'}
                   </Typography>

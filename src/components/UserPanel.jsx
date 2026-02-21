@@ -1,6 +1,9 @@
 import AddIcon from '@mui/icons-material/Add'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import DeleteIcon from '@mui/icons-material/Delete'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import LogoutIcon from '@mui/icons-material/Logout'
 import SettingsIcon from '@mui/icons-material/Settings'
@@ -25,21 +28,26 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUser } from '../context/UserContext'
 import { useThemeMode } from '../context/ThemeContext'
+import { useI18n } from '../context/I18nContext'
 
-const TODO_STORAGE_KEY = 'lingo-todos'
+const PANEL_COLLAPSED_KEY = 'lingo-panel-collapsed'
 
-function loadTodos() {
+function getTodoKey(userName) {
+    return `lingo-todos-${userName || 'guest'}`
+}
+
+function loadTodos(userName) {
     try {
-        const stored = window.localStorage.getItem(TODO_STORAGE_KEY)
+        const stored = window.localStorage.getItem(getTodoKey(userName))
         return stored ? JSON.parse(stored) : []
     } catch {
         return []
     }
 }
 
-function saveTodos(todos) {
+function saveTodos(userName, todos) {
     try {
-        window.localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todos))
+        window.localStorage.setItem(getTodoKey(userName), JSON.stringify(todos))
     } catch {
         // ignore
     }
@@ -48,13 +56,36 @@ function saveTodos(todos) {
 export function UserPanel() {
     const { user, logout } = useUser()
     const { mode, toggleMode } = useThemeMode()
+    const { t, isTranslated, tOriginal } = useI18n()
     const navigate = useNavigate()
-    const [todos, setTodos] = useState(loadTodos)
+
+    const [collapsed, setCollapsed] = useState(() => {
+        try {
+            return localStorage.getItem(PANEL_COLLAPSED_KEY) === 'true'
+        } catch {
+            return false
+        }
+    })
+
+    const [todos, setTodos] = useState(() => loadTodos(user?.name))
     const [newTodo, setNewTodo] = useState('')
 
     useEffect(() => {
-        saveTodos(todos)
-    }, [todos])
+        try {
+            localStorage.setItem(PANEL_COLLAPSED_KEY, String(collapsed))
+        } catch {
+            /* ignore */
+        }
+    }, [collapsed])
+
+    useEffect(() => {
+        saveTodos(user?.name, todos)
+    }, [todos, user?.name])
+
+    // Reload todos when user changes
+    useEffect(() => {
+        setTodos(loadTodos(user?.name))
+    }, [user?.name])
 
     const handleAddTodo = () => {
         const text = newTodo.trim()
@@ -94,6 +125,55 @@ export function UserPanel() {
             .slice(0, 2)
         : '?'
 
+    /* ── Collapsed state ── */
+    if (collapsed) {
+        return (
+            <Box
+                sx={{
+                    width: 48,
+                    flexShrink: 0,
+                    borderLeft: 1,
+                    borderColor: 'divider',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    pt: 2,
+                    gap: 1.5,
+                    bgcolor: 'background.paper',
+                    height: '100vh',
+                }}
+            >
+                <Tooltip title={isTranslated ? `${t('panel.expand')} (${tOriginal('panel.expand')})` : t('panel.expand')} placement="left">
+                    <IconButton size="small" onClick={() => setCollapsed(false)}>
+                        <ChevronLeftIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+                <Divider sx={{ width: '80%' }} />
+                <Tooltip title={user?.name || 'User'} placement="left">
+                    <Avatar
+                        sx={{
+                            width: 32,
+                            height: 32,
+                            bgcolor: 'primary.main',
+                            fontSize: 12,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                        }}
+                        onClick={() => setCollapsed(false)}
+                    >
+                        {initials}
+                    </Avatar>
+                </Tooltip>
+                <Tooltip title={mode === 'light' ? t('panel.darkMode') : t('panel.lightMode')} placement="left">
+                    <IconButton size="small" onClick={toggleMode}>
+                        {mode === 'light' ? <DarkModeIcon sx={{ fontSize: 18 }} /> : <LightModeIcon sx={{ fontSize: 18 }} />}
+                    </IconButton>
+                </Tooltip>
+            </Box>
+        )
+    }
+
+    /* ── Expanded state ── */
     return (
         <Box
             sx={{
@@ -107,8 +187,19 @@ export function UserPanel() {
                 borderColor: 'divider',
                 height: '100vh',
                 overflow: 'auto',
+                bgcolor: 'background.paper',
+                transition: 'width 0.2s ease',
             }}
         >
+            {/* Collapse button */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Tooltip title={isTranslated ? `${t('panel.collapse')} (${tOriginal('panel.collapse')})` : t('panel.collapse')}>
+                    <IconButton size="small" onClick={() => setCollapsed(true)}>
+                        <ChevronRightIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            </Box>
+
             {/* Profile section */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Avatar
@@ -123,14 +214,14 @@ export function UserPanel() {
                     {initials}
                 </Avatar>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>
+                    <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600, color: 'text.primary' }}>
                         {user?.name || 'Guest'}
                     </Typography>
                     <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
                         {user?.role || ''}
                     </Typography>
                 </Box>
-                <Tooltip title="Settings">
+                <Tooltip title={isTranslated ? `${t('panel.settings')} (${tOriginal('panel.settings')})` : t('panel.settings')}>
                     <IconButton size="small" onClick={() => navigate('/settings')}>
                         <SettingsIcon fontSize="small" />
                     </IconButton>
@@ -141,12 +232,12 @@ export function UserPanel() {
 
             {/* Theme toggle & Logout */}
             <Stack direction="row" spacing={1} justifyContent="center">
-                <Tooltip title={mode === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
+                <Tooltip title={mode === 'light' ? t('panel.darkMode') : t('panel.lightMode')}>
                     <IconButton onClick={toggleMode} size="small">
                         {mode === 'light' ? <DarkModeIcon fontSize="small" /> : <LightModeIcon fontSize="small" />}
                     </IconButton>
                 </Tooltip>
-                <Tooltip title="Logout">
+                <Tooltip title={isTranslated ? `${t('panel.logout')} (${tOriginal('panel.logout')})` : t('panel.logout')}>
                     <IconButton onClick={handleLogout} size="small" color="error">
                         <LogoutIcon fontSize="small" />
                     </IconButton>
@@ -156,15 +247,27 @@ export function UserPanel() {
             <Divider />
 
             {/* To-do list */}
-            <Card variant="outlined" sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <Card
+                variant="outlined"
+                sx={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    bgcolor: (theme) =>
+                        theme.palette.mode === 'light' ? '#fafbfc' : '#252530',
+                }}
+            >
                 <CardContent sx={{ pb: 1 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                        My To-Do List
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}
+                        title={isTranslated ? tOriginal('panel.todoTitle') : undefined}
+                    >
+                        {t('panel.todoTitle')}
                     </Typography>
                     <Stack direction="row" spacing={1} alignItems="center">
                         <TextField
                             size="small"
-                            placeholder="Add a task..."
+                            placeholder={t('panel.addTask')}
                             value={newTodo}
                             onChange={(e) => setNewTodo(e.target.value)}
                             onKeyDown={handleKeyDown}
@@ -188,7 +291,7 @@ export function UserPanel() {
                             color="text.secondary"
                             sx={{ display: 'block', textAlign: 'center', py: 3 }}
                         >
-                            No tasks yet
+                            {t('panel.noTasks')}
                         </Typography>
                     ) : (
                         todos.map((todo) => (
@@ -228,6 +331,25 @@ export function UserPanel() {
                         ))
                     )}
                 </List>
+                {/* Local-only notice */}
+                <Box
+                    sx={{
+                        px: 2,
+                        py: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        borderTop: 1,
+                        borderColor: 'divider',
+                    }}
+                >
+                    <InfoOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+                    <Typography variant="caption" color="text.disabled" sx={{ fontSize: 11 }}
+                        title={isTranslated ? tOriginal('panel.todoNotice') : undefined}
+                    >
+                        {t('panel.todoNotice')}
+                    </Typography>
+                </Box>
             </Card>
         </Box>
     )

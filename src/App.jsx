@@ -3,12 +3,14 @@ import { useMemo } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
 import { AppLayout } from './components/AppLayout'
+import { I18nProvider } from './context/I18nContext'
 import { ThemeProvider, useThemeMode } from './context/ThemeContext'
 import { UserProvider, useUser } from './context/UserContext'
 import { CalendarPage } from './pages/CalendarPage'
 import { CoursesPage } from './pages/CoursesPage'
 import { LoginPage } from './pages/LoginPage'
 import { NotesPage } from './pages/NotesPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { StudentDashboard } from './pages/StudentDashboard'
 import { TeacherDashboard } from './pages/TeacherDashboard'
 
@@ -25,6 +27,10 @@ function getTheme(mode) {
       background: {
         default: mode === 'light' ? '#F5F5F5' : '#121212',
         paper: mode === 'light' ? '#FFFFFF' : '#1E1E1E',
+      },
+      text: {
+        primary: mode === 'light' ? '#1a1a2e' : '#e8e8e8',
+        secondary: mode === 'light' ? '#555770' : '#a0a0b0',
       },
     },
     typography: {
@@ -46,6 +52,38 @@ function getTheme(mode) {
         styleOverrides: {
           root: {
             borderRadius: 12,
+            backdropFilter: 'blur(12px)',
+            backgroundColor: mode === 'light'
+              ? 'rgba(255, 255, 255, 0.65)'
+              : 'rgba(40, 40, 50, 0.65)',
+            border: `1px solid ${mode === 'light' ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.06)'}`,
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+            backdropFilter: 'blur(12px)',
+            backgroundColor: mode === 'light'
+              ? 'rgba(255, 255, 255, 0.72)'
+              : 'rgba(30, 30, 30, 0.72)',
+            border: `1px solid ${mode === 'light' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.08)'}`,
+          },
+        },
+      },
+      MuiInputBase: {
+        styleOverrides: {
+          root: {
+            color: mode === 'light' ? '#1a1a2e' : '#e8e8e8',
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            color: mode === 'light' ? '#555770' : '#a0a0b0',
           },
         },
       },
@@ -75,11 +113,20 @@ function RequireAuth({ children }) {
   return children
 }
 
+/** Redirect logged-in users from "/" to their dashboard */
+function LoginRoute() {
+  const { user } = useUser()
+  if (user) {
+    return <Navigate to={user.role === 'teacher' ? '/teacher' : '/student'} replace />
+  }
+  return <LoginPage />
+}
+
 function AppRoutes() {
   return (
     <AppLayout>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
+        <Route path="/" element={<LoginRoute />} />
         <Route
           path="/teacher"
           element={
@@ -120,6 +167,14 @@ function AppRoutes() {
             </RequireAuth>
           }
         />
+        <Route
+          path="/settings"
+          element={
+            <RequireAuth>
+              <SettingsPage />
+            </RequireAuth>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppLayout>
@@ -134,9 +189,11 @@ function ThemedApp() {
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
-        <UserProvider>
-          <AppRoutes />
-        </UserProvider>
+        <I18nProvider>
+          <UserProvider>
+            <AppRoutes />
+          </UserProvider>
+        </I18nProvider>
       </BrowserRouter>
     </MuiThemeProvider>
   )

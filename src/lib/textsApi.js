@@ -1,9 +1,12 @@
 import { supabase } from './supabaseClient'
 
-export async function createText({ title, content, language }) {
+export async function createText({ title, content, language, classroom_code }) {
+  const row = { title, content, language }
+  if (classroom_code) row.classroom_code = classroom_code
+
   const { data, error } = await supabase
     .from('texts')
-    .insert([{ title, content, language }])
+    .insert([row])
     .select()
     .single()
 
@@ -14,11 +17,17 @@ export async function createText({ title, content, language }) {
   return data
 }
 
-export async function listTexts() {
-  const { data, error } = await supabase
+export async function listTexts(classroomCode) {
+  let query = supabase
     .from('texts')
-    .select('id, title, language, created_at')
+    .select('id, title, language, created_at, classroom_code')
     .order('created_at', { ascending: false })
+
+  if (classroomCode) {
+    query = query.eq('classroom_code', classroomCode)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     throw error
