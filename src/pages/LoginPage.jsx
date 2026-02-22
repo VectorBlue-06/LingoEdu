@@ -25,6 +25,7 @@ import { useUser } from '../context/UserContext'
 import { useThemeMode } from '../context/ThemeContext'
 import { useI18n } from '../context/I18nContext'
 import { LANGUAGES } from '../lib/languages'
+import logoImg from '../assets/logo.png'
 
 export function LoginPage() {
   const { login } = useUser()
@@ -64,7 +65,7 @@ export function LoginPage() {
         ...(effectsEnabled
           ? {
             background:
-              'linear-gradient(135deg, #667eea 0%, #764ba2 30%, #f093fb 60%, #5ee7df 100%)',
+              'linear-gradient(135deg, #317BC6 0%, #47349D 30%, #CFCEE0 60%, #4F3CAF 100%)',
             '&::before': {
               content: '""',
               position: 'absolute',
@@ -73,12 +74,12 @@ export function LoginPage() {
               width: '200%',
               height: '200%',
               background:
-                'radial-gradient(circle at 20% 80%, rgba(120, 200, 255, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(200, 120, 255, 0.3) 0%, transparent 50%)',
+                'radial-gradient(circle at 20% 80%, rgba(49, 123, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(79, 60, 175, 0.3) 0%, transparent 50%)',
               animation: 'float 8s ease-in-out infinite alternate',
             },
           }
           : {
-            bgcolor: '#f0e6ff',
+            bgcolor: '#CFCEE0',
           }),
       }}
     >
@@ -97,7 +98,7 @@ export function LoginPage() {
             backdropFilter: 'blur(20px) saturate(180%)',
             bgcolor: 'rgba(255,255,255,0.60)',
             border: '1px solid rgba(255,255,255,0.45)',
-            boxShadow: '0 8px 32px rgba(118, 75, 162, 0.25)',
+            boxShadow: '0 8px 32px rgba(71, 52, 157, 0.25)',
           }),
           ...(!effectsEnabled && {
             bgcolor: 'rgba(255,255,255,0.95)',
@@ -125,10 +126,15 @@ export function LoginPage() {
                 py: 4,
               }}
             >
-              <GroupsIcon sx={{ fontSize: 120, color: '#764ba2', opacity: 0.8 }} />
+              <Box
+                    component="img"
+                    src={logoImg}
+                    alt="LingoEdu"
+                    sx={{ width: 120, height: 120, objectFit: 'contain', mb: 1 }}
+                />
               <Typography
                 variant="body2"
-                sx={{ color: '#764ba2', textAlign: 'center', fontWeight: 500 }}
+                sx={{ color: '#47349D', textAlign: 'center', fontWeight: 500 }}
                 title={isTranslated ? tOriginal('login.connect') : undefined}
               >
                 {t('login.connect')}
@@ -140,12 +146,12 @@ export function LoginPage() {
               <Typography
                 variant="h4"
                 component="h1"
-                sx={{ fontWeight: 700, mb: 0.5, color: '#2d1b4e' }}
+                sx={{ fontWeight: 700, mb: 0.5, color: '#16195E' }}
                 title={isTranslated ? tOriginal('login.title') : undefined}
               >
                 {t('login.title')}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 3, color: '#555' }}
+              <Typography variant="body2" sx={{ mb: 3, color: '#555770' }}
                 title={isTranslated ? tOriginal('login.subtitle') : undefined}
               >
                 {t('login.subtitle')}
@@ -159,14 +165,14 @@ export function LoginPage() {
                     control={<Radio size="small" />}
                     label={t('login.teacher')}
                     title={isTranslated ? tOriginal('login.teacher') : undefined}
-                    sx={{ '& .MuiTypography-root': { fontSize: 14, color: '#3d2a5c' } }}
+                    sx={{ '& .MuiTypography-root': { fontSize: 14, color: '#16195E' } }}
                   />
                   <FormControlLabel
                     value="student"
                     control={<Radio size="small" />}
                     label={t('login.student')}
                     title={isTranslated ? tOriginal('login.student') : undefined}
-                    sx={{ '& .MuiTypography-root': { fontSize: 14, color: '#3d2a5c' } }}
+                    sx={{ '& .MuiTypography-root': { fontSize: 14, color: '#16195E' } }}
                   />
                 </RadioGroup>
                 {roleError && (
@@ -193,8 +199,8 @@ export function LoginPage() {
                         size="small"
                         sx={{
                           '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                          '& .MuiInputBase-input': { color: '#2d1b4e' },
-                          '& .MuiInputLabel-root': { color: '#5a4478' },
+                          '& .MuiInputBase-input': { color: '#16195E' },
+                          '& .MuiInputLabel-root': { color: '#47349D' },
                         }}
                       />
                     )}
@@ -212,9 +218,9 @@ export function LoginPage() {
                       placeholder={t('common.comingSoon')}
                       sx={{
                         '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                        '& .MuiInputLabel-root': { color: '#5a4478' },
-                        '& .Mui-disabled': { WebkitTextFillColor: '#7a6a94' },
-                        '& .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(118, 75, 162, 0.3)' },
+                        '& .MuiInputLabel-root': { color: '#47349D' },
+                        '& .Mui-disabled': { WebkitTextFillColor: '#555770' },
+                        '& .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(71, 52, 157, 0.3)' },
                       }}
                     />
                   </Tooltip>
@@ -230,8 +236,8 @@ export function LoginPage() {
                     helperText={nameError ? t('login.nameRequired') : ''}
                     sx={{
                       '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                      '& .MuiInputBase-input': { color: '#2d1b4e' },
-                      '& .MuiInputLabel-root': { color: '#5a4478' },
+                      '& .MuiInputBase-input': { color: '#16195E' },
+                      '& .MuiInputLabel-root': { color: '#47349D' },
                     }}
                   />
 
@@ -246,9 +252,9 @@ export function LoginPage() {
                       placeholder={t('common.comingSoon')}
                       sx={{
                         '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                        '& .MuiInputLabel-root': { color: '#5a4478' },
-                        '& .Mui-disabled': { WebkitTextFillColor: '#7a6a94' },
-                        '& .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(118, 75, 162, 0.3)' },
+                        '& .MuiInputLabel-root': { color: '#47349D' },
+                        '& .Mui-disabled': { WebkitTextFillColor: '#555770' },
+                        '& .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(71, 52, 157, 0.3)' },
                       }}
                     />
                   </Tooltip>
@@ -256,9 +262,9 @@ export function LoginPage() {
                   {/* Teacher certification checkbox */}
                   {role === 'teacher' && (
                     <FormControlLabel
-                      control={<Checkbox size="small" disabled sx={{ color: '#764ba2' }} />}
+                      control={<Checkbox size="small" disabled sx={{ color: '#4F3CAF' }} />}
                       label={
-                        <Typography variant="caption" sx={{ color: '#5a4478' }}>
+                        <Typography variant="caption" sx={{ color: '#47349D' }}>
                           {t('login.certify')}
                         </Typography>
                       }
@@ -275,9 +281,9 @@ export function LoginPage() {
                       borderRadius: 2,
                       fontSize: 15,
                       fontWeight: 700,
-                      background: 'linear-gradient(135deg, #764ba2, #667eea)',
+                      background: 'linear-gradient(135deg, #4F3CAF, #317BC6)',
                       '&:hover': {
-                        background: 'linear-gradient(135deg, #5e3a82, #5268d0)',
+                        background: 'linear-gradient(135deg, #47349D, #2a6ab0)',
                       },
                     }}
                   >
@@ -285,14 +291,14 @@ export function LoginPage() {
                   </Button>
 
                   {/* Sign in link placeholder */}
-                  <Typography variant="body2" sx={{ color: '#5a4478' }} textAlign="center"
+                  <Typography variant="body2" sx={{ color: '#47349D' }} textAlign="center"
                     title={isTranslated ? tOriginal('login.signIn') : undefined}
                   >
                     {t('login.signIn')}{' '}
                     <Typography
                       component="span"
                       variant="body2"
-                      sx={{ color: '#764ba2', fontWeight: 600, cursor: 'pointer' }}
+                      sx={{ color: '#4F3CAF', fontWeight: 600, cursor: 'pointer' }}
                     >
                       {t('login.signInLink')}
                     </Typography>{' '}
@@ -301,29 +307,29 @@ export function LoginPage() {
 
                   {/* Social login placeholders */}
                   <Divider>
-                    <Typography variant="caption" sx={{ color: '#5a4478' }}>
+                    <Typography variant="caption" sx={{ color: '#47349D' }}>
                       {t('login.orContinue')}
                     </Typography>
                   </Divider>
                   <Stack direction="row" justifyContent="center" spacing={2}>
                     <Tooltip title={t('login.comingSoonFeature')} arrow>
                       <span>
-                        <IconButton disabled sx={{ border: 1, borderColor: 'rgba(118, 75, 162, 0.3)' }}>
-                          <GoogleIcon sx={{ color: '#764ba2' }} />
+                        <IconButton disabled sx={{ border: 1, borderColor: 'rgba(71, 52, 157, 0.3)' }}>
+                          <GoogleIcon sx={{ color: '#4F3CAF' }} />
                         </IconButton>
                       </span>
                     </Tooltip>
                     <Tooltip title={t('login.comingSoonFeature')} arrow>
                       <span>
-                        <IconButton disabled sx={{ border: 1, borderColor: 'rgba(118, 75, 162, 0.3)' }}>
-                          <FacebookIcon sx={{ color: '#764ba2' }} />
+                        <IconButton disabled sx={{ border: 1, borderColor: 'rgba(71, 52, 157, 0.3)' }}>
+                          <FacebookIcon sx={{ color: '#4F3CAF' }} />
                         </IconButton>
                       </span>
                     </Tooltip>
                     <Tooltip title={t('login.comingSoonFeature')} arrow>
                       <span>
-                        <IconButton disabled sx={{ border: 1, borderColor: 'rgba(118, 75, 162, 0.3)' }}>
-                          <GroupsIcon sx={{ color: '#764ba2' }} />
+                        <IconButton disabled sx={{ border: 1, borderColor: 'rgba(71, 52, 157, 0.3)' }}>
+                          <GroupsIcon sx={{ color: '#4F3CAF' }} />
                         </IconButton>
                       </span>
                     </Tooltip>

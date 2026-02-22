@@ -13,7 +13,7 @@ const BATCH_DELAY_MS = 200 // debounce before sending a translation batch
 
 export const DEFAULT_STRINGS = {
   // Common
-  'app.name': 'Text Bridge',
+  'app.name': 'LingoEdu',
   'common.save': 'Save',
   'common.cancel': 'Cancel',
   'common.delete': 'Delete',

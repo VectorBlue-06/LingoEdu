@@ -14,23 +14,34 @@ import { SettingsPage } from './pages/SettingsPage'
 import { StudentDashboard } from './pages/StudentDashboard'
 import { TeacherDashboard } from './pages/TeacherDashboard'
 
+// LingoEdu brand palette
+const BRAND = {
+  steelBlue: '#317BC6',
+  indigoVelvet: '#47349D',
+  lavender: '#CFCEE0',
+  persianBlue: '#4F3CAF',
+  deepTwilight: '#16195E',
+}
+
 function getTheme(mode) {
   return createTheme({
     palette: {
       mode,
       primary: {
-        main: mode === 'light' ? '#4CAF50' : '#66BB6A',
+        main: BRAND.persianBlue,
+        dark: BRAND.indigoVelvet,
+        light: BRAND.steelBlue,
       },
       secondary: {
-        main: '#9C27B0',
+        main: BRAND.steelBlue,
       },
       background: {
-        default: mode === 'light' ? '#F5F5F5' : '#121212',
-        paper: mode === 'light' ? '#FFFFFF' : '#1E1E1E',
+        default: mode === 'light' ? '#F4F3FA' : '#0e0e1a',
+        paper: mode === 'light' ? '#FFFFFF' : '#1a1a2e',
       },
       text: {
-        primary: mode === 'light' ? '#1a1a2e' : '#e8e8e8',
-        secondary: mode === 'light' ? '#555770' : '#a0a0b0',
+        primary: mode === 'light' ? BRAND.deepTwilight : '#e8e8f0',
+        secondary: mode === 'light' ? '#555770' : '#a0a0b8',
       },
     },
     typography: {
@@ -54,9 +65,9 @@ function getTheme(mode) {
             borderRadius: 12,
             backdropFilter: 'blur(12px)',
             backgroundColor: mode === 'light'
-              ? 'rgba(255, 255, 255, 0.65)'
-              : 'rgba(40, 40, 50, 0.65)',
-            border: `1px solid ${mode === 'light' ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.06)'}`,
+              ? 'rgba(255, 255, 255, 0.70)'
+              : 'rgba(26, 26, 46, 0.70)',
+            border: `1px solid ${mode === 'light' ? 'rgba(207,206,224,0.5)' : 'rgba(207,206,224,0.08)'}`,
             transition: 'transform 0.2s ease, box-shadow 0.2s ease',
           },
         },
@@ -67,23 +78,23 @@ function getTheme(mode) {
             backgroundImage: 'none',
             backdropFilter: 'blur(12px)',
             backgroundColor: mode === 'light'
-              ? 'rgba(255, 255, 255, 0.72)'
-              : 'rgba(30, 30, 30, 0.72)',
-            border: `1px solid ${mode === 'light' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.08)'}`,
+              ? 'rgba(255, 255, 255, 0.75)'
+              : 'rgba(26, 26, 46, 0.75)',
+            border: `1px solid ${mode === 'light' ? 'rgba(207,206,224,0.4)' : 'rgba(207,206,224,0.08)'}`,
           },
         },
       },
       MuiInputBase: {
         styleOverrides: {
           root: {
-            color: mode === 'light' ? '#1a1a2e' : '#e8e8e8',
+            color: mode === 'light' ? BRAND.deepTwilight : '#e8e8f0',
           },
         },
       },
       MuiInputLabel: {
         styleOverrides: {
           root: {
-            color: mode === 'light' ? '#555770' : '#a0a0b0',
+            color: mode === 'light' ? '#555770' : '#a0a0b8',
           },
         },
       },

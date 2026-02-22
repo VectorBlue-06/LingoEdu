@@ -21,6 +21,7 @@ import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useUser } from '../context/UserContext'
 import { useI18n } from '../context/I18nContext'
+import logoImg from '../assets/logo.png'
 
 const DRAWER_WIDTH = 240
 
@@ -63,8 +64,8 @@ export function Sidebar() {
                 '& .MuiDrawer-paper': {
                     width: DRAWER_WIDTH,
                     boxSizing: 'border-box',
-                    bgcolor: 'grey.900',
-                    color: 'grey.100',
+                    bgcolor: '#16195E',
+                    color: '#CFCEE0',
                     borderRight: 'none',
                 },
             }}
@@ -72,27 +73,22 @@ export function Sidebar() {
             {/* Branding */}
             <Box sx={{ px: 2.5, py: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Box
+                    component="img"
+                    src={logoImg}
+                    alt="LingoEdu"
                     sx={{
                         width: 36,
                         height: 36,
                         borderRadius: 1.5,
-                        bgcolor: 'primary.main',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 700,
-                        fontSize: 16,
-                        color: '#fff',
+                        objectFit: 'contain',
                     }}
-                >
-                    TB
-                </Box>
+                />
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, letterSpacing: 0.5 }}>
                     {t('app.name')}
                 </Typography>
             </Box>
 
-            <Divider sx={{ borderColor: 'grey.800' }} />
+            <Divider sx={{ borderColor: 'rgba(207,206,224,0.15)' }} />
 
             {/* Main nav */}
             <List sx={{ flex: 1, pt: 1 }}>
@@ -106,10 +102,10 @@ export function Sidebar() {
                                     mx: 1,
                                     borderRadius: 2,
                                     mb: 0.5,
-                                    '&:hover': { bgcolor: 'grey.800' },
+                                    '&:hover': { bgcolor: 'rgba(207,206,224,0.08)' },
                                 }}
                             >
-                                <ListItemIcon sx={{ color: 'grey.400', minWidth: 40 }}>
+                                <ListItemIcon sx={{ color: '#CFCEE0', minWidth: 40 }}>
                                     {item.icon}
                                 </ListItemIcon>
                                 <ListItemText
@@ -117,9 +113,9 @@ export function Sidebar() {
                                     primaryTypographyProps={{ fontSize: 14, fontWeight: 500 }}
                                 />
                                 {coursesOpen ? (
-                                    <ExpandLess sx={{ color: 'grey.500', fontSize: 20 }} />
+                                    <ExpandLess sx={{ color: 'rgba(207,206,224,0.6)', fontSize: 20 }} />
                                 ) : (
-                                    <ExpandMore sx={{ color: 'grey.500', fontSize: 20 }} />
+                                    <ExpandMore sx={{ color: 'rgba(207,206,224,0.6)', fontSize: 20 }} />
                                 )}
                             </ListItemButton>
                             <Collapse in={coursesOpen} timeout="auto" unmountOnExit>
@@ -140,7 +136,7 @@ export function Sidebar() {
                                                     color: 'primary.contrastText',
                                                     '&:hover': { bgcolor: 'primary.dark' },
                                                 },
-                                                '&:hover': { bgcolor: 'grey.800' },
+                                                '&:hover': { bgcolor: 'rgba(207,206,224,0.08)' },
                                             }}
                                         >
                                             <ListItemText
@@ -167,10 +163,10 @@ export function Sidebar() {
                                     color: 'primary.contrastText',
                                     '&:hover': { bgcolor: 'primary.dark' },
                                 },
-                                '&:hover': { bgcolor: 'grey.800' },
+                                '&:hover': { bgcolor: 'rgba(207,206,224,0.08)' },
                             }}
                         >
-                            <ListItemIcon sx={{ color: isActive(item.path) ? 'primary.light' : 'grey.400', minWidth: 40 }}>
+                            <ListItemIcon sx={{ color: isActive(item.path) ? 'primary.light' : '#CFCEE0', minWidth: 40 }}>
                                 {item.icon}
                             </ListItemIcon>
                             <ListItemText
@@ -182,7 +178,7 @@ export function Sidebar() {
                 )}
             </List>
 
-            <Divider sx={{ borderColor: 'grey.800' }} />
+            <Divider sx={{ borderColor: 'rgba(207,206,224,0.15)' }} />
 
             {/* Bottom nav */}
             <List sx={{ pb: 1 }}>
@@ -201,10 +197,10 @@ export function Sidebar() {
                                 color: 'primary.contrastText',
                                 '&:hover': { bgcolor: 'primary.dark' },
                             },
-                            '&:hover': { bgcolor: 'grey.800' },
+                            '&:hover': { bgcolor: 'rgba(207,206,224,0.08)' },
                         }}
                     >
-                        <ListItemIcon sx={{ color: 'grey.400', minWidth: 40 }}>
+                        <ListItemIcon sx={{ color: '#CFCEE0', minWidth: 40 }}>
                             {item.icon}
                         </ListItemIcon>
                         <ListItemText
