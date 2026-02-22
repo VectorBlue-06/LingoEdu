@@ -28,6 +28,26 @@ function getFirstDayOfMonth(year, month) {
     return new Date(year, month, 1).getDay()
 }
 
+/** Build a 2D array of weeks. Each week is an array of 7 day-values (null for empty cells). */
+function buildCalendarWeeks(year, month) {
+    const daysInMonth = getDaysInMonth(year, month)
+    const firstDay = getFirstDayOfMonth(year, month)
+    const weeks = []
+    let currentWeek = new Array(7).fill(null)
+
+    // Fill leading empties then days
+    for (let day = 1; day <= daysInMonth; day++) {
+        const col = (firstDay + day - 1) % 7
+        if (col === 0 && day > 1) {
+            weeks.push(currentWeek)
+            currentWeek = new Array(7).fill(null)
+        }
+        currentWeek[col] = day
+    }
+    weeks.push(currentWeek) // push last partial week
+    return weeks
+}
+
 export function CalendarPage() {
     const { user } = useUser()
     const { t } = useI18n()
@@ -87,8 +107,7 @@ export function CalendarPage() {
         return map
     }, [recentTexts, currentMonth, currentYear])
 
-    const daysInMonth = getDaysInMonth(currentYear, currentMonth)
-    const firstDay = getFirstDayOfMonth(currentYear, currentMonth)
+    const weeks = useMemo(() => buildCalendarWeeks(currentYear, currentMonth), [currentYear, currentMonth])
     const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' })
 
     const handlePrevMonth = () => {
@@ -132,12 +151,12 @@ export function CalendarPage() {
                     {/* Calendar grid */}
                     <Grid item xs={12} md={9}>
                         <Card variant="outlined" sx={{ borderRadius: 2 }}>
-                            <CardContent>
+                            <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
                                 {/* Month navigation */}
                                 <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
                                     <Typography
                                         variant="body1"
-                                        sx={{ cursor: 'pointer', color: 'primary.main', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}
+                                        sx={{ cursor: 'pointer', color: 'primary.main', fontWeight: 600, userSelect: 'none', '&:hover': { textDecoration: 'underline' } }}
                                         onClick={handlePrevMonth}
                                     >
                                         ← {t('calendar.prev')}
@@ -147,110 +166,149 @@ export function CalendarPage() {
                                     </Typography>
                                     <Typography
                                         variant="body1"
-                                        sx={{ cursor: 'pointer', color: 'primary.main', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}
+                                        sx={{ cursor: 'pointer', color: 'primary.main', fontWeight: 600, userSelect: 'none', '&:hover': { textDecoration: 'underline' } }}
                                         onClick={handleNextMonth}
                                     >
                                         {t('calendar.next')} →
                                     </Typography>
                                 </Stack>
 
-                                {/* Weekday headers */}
-                                <Grid container spacing={0}>
-                                    {WEEKDAYS.map((d) => (
-                                        <Grid item xs={12 / 7} key={d}>
-                                            <Typography
-                                                variant="body2"
-                                                sx={{ textAlign: 'center', display: 'block', fontWeight: 700, color: 'text.secondary', pb: 1, textTransform: 'uppercase', fontSize: 12, letterSpacing: 1 }}
-                                            >
-                                                {d}
-                                            </Typography>
-                                        </Grid>
-                                    ))}
-                                </Grid>
-
-                                {/* Days */}
-                                <Grid container spacing={0}>
-                                    {/* Empty cells for days before the 1st */}
-                                    {Array.from({ length: firstDay }).map((_, i) => (
-                                        <Grid item xs={12 / 7} key={`e-${i}`}>
-                                            <Box sx={{ minHeight: { xs: 72, sm: 90, md: 110 } }} />
-                                        </Grid>
-                                    ))}
-                                    {Array.from({ length: daysInMonth }).map((_, i) => {
-                                        const day = i + 1
-                                        const isToday =
-                                            day === today.getDate() &&
-                                            currentMonth === today.getMonth() &&
-                                            currentYear === today.getFullYear()
-                                        const dayTexts = textsByDate[day] || []
-
-                                        return (
-                                            <Grid item xs={12 / 7} key={day}>
+                                {/* Calendar table */}
+                                <Box
+                                    component="table"
+                                    sx={{
+                                        width: '100%',
+                                        borderCollapse: 'collapse',
+                                        tableLayout: 'fixed',
+                                    }}
+                                >
+                                    {/* Weekday header row */}
+                                    <Box component="thead">
+                                        <Box component="tr">
+                                            {WEEKDAYS.map((dayName) => (
                                                 <Box
+                                                    component="th"
+                                                    key={dayName}
                                                     sx={{
-                                                        minHeight: { xs: 72, sm: 90, md: 110 },
-                                                        border: '1px solid',
-                                                        borderColor: isToday ? 'primary.main' : 'divider',
-                                                        borderRadius: 1.5,
-                                                        p: 1,
-                                                        bgcolor: isToday ? 'primary.main' : 'transparent',
-                                                        overflow: 'hidden',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        cursor: 'default',
-                                                        transition: 'background-color 0.15s ease',
-                                                        '&:hover': {
-                                                            bgcolor: isToday ? 'primary.dark' : (theme) => theme.palette.mode === 'light' ? 'rgba(79, 60, 175, 0.04)' : 'rgba(207, 206, 224, 0.06)',
-                                                        },
+                                                        py: 1.5,
+                                                        textAlign: 'center',
+                                                        fontWeight: 700,
+                                                        fontSize: 13,
+                                                        letterSpacing: 1,
+                                                        textTransform: 'uppercase',
+                                                        color: 'text.secondary',
+                                                        borderBottom: '2px solid',
+                                                        borderColor: 'divider',
                                                     }}
                                                 >
-                                                    <Typography
-                                                        variant="body2"
-                                                        sx={{
-                                                            fontWeight: isToday ? 700 : 500,
-                                                            color: isToday ? '#fff' : 'text.primary',
-                                                            fontSize: { xs: 13, md: 15 },
-                                                        }}
-                                                    >
-                                                        {day}
-                                                    </Typography>
-                                                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25, mt: 0.5 }}>
-                                                        {dayTexts.slice(0, 2).map((tx, idx) => (
-                                                            <Typography
-                                                                key={idx}
-                                                                variant="caption"
-                                                                noWrap
+                                                    {dayName}
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    </Box>
+
+                                    {/* Week rows */}
+                                    <Box component="tbody">
+                                        {weeks.map((week, weekIdx) => (
+                                            <Box component="tr" key={weekIdx}>
+                                                {week.map((day, colIdx) => {
+                                                    if (day === null) {
+                                                        return (
+                                                            <Box
+                                                                component="td"
+                                                                key={`empty-${weekIdx}-${colIdx}`}
                                                                 sx={{
-                                                                    fontSize: 10,
-                                                                    bgcolor: isToday ? 'rgba(255,255,255,0.25)' : 'secondary.main',
-                                                                    color: isToday ? '#fff' : '#fff',
-                                                                    borderRadius: 0.5,
-                                                                    px: 0.5,
-                                                                    lineHeight: 1.6,
+                                                                    height: { xs: 80, sm: 100, md: 120 },
+                                                                    border: '1px solid',
+                                                                    borderColor: 'divider',
+                                                                    bgcolor: (theme) =>
+                                                                        theme.palette.mode === 'light'
+                                                                            ? 'rgba(0,0,0,0.015)'
+                                                                            : 'rgba(255,255,255,0.015)',
+                                                                    verticalAlign: 'top',
+                                                                    p: 0,
+                                                                }}
+                                                            />
+                                                        )
+                                                    }
+
+                                                    const isToday =
+                                                        day === today.getDate() &&
+                                                        currentMonth === today.getMonth() &&
+                                                        currentYear === today.getFullYear()
+                                                    const dayTexts = textsByDate[day] || []
+                                                    const isWeekend = colIdx === 0 || colIdx === 6
+
+                                                    return (
+                                                        <Box
+                                                            component="td"
+                                                            key={day}
+                                                            sx={{
+                                                                height: { xs: 80, sm: 100, md: 120 },
+                                                                border: '1px solid',
+                                                                borderColor: isToday ? 'primary.main' : 'divider',
+                                                                bgcolor: isToday
+                                                                    ? 'primary.main'
+                                                                    : isWeekend
+                                                                        ? (theme) => theme.palette.mode === 'light' ? 'rgba(79,60,175,0.02)' : 'rgba(207,206,224,0.02)'
+                                                                        : 'transparent',
+                                                                verticalAlign: 'top',
+                                                                p: 1,
+                                                                cursor: 'default',
+                                                                transition: 'background-color 0.15s ease',
+                                                                '&:hover': {
+                                                                    bgcolor: isToday
+                                                                        ? 'primary.dark'
+                                                                        : (theme) => theme.palette.mode === 'light'
+                                                                            ? 'rgba(79,60,175,0.05)'
+                                                                            : 'rgba(207,206,224,0.06)',
+                                                                },
+                                                            }}
+                                                        >
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    fontWeight: isToday ? 700 : 500,
+                                                                    color: isToday ? '#fff' : 'text.primary',
+                                                                    fontSize: { xs: 13, md: 15 },
+                                                                    mb: 0.5,
                                                                 }}
                                                             >
-                                                                {tx.title}
+                                                                {day}
                                                             </Typography>
-                                                        ))}
-                                                        {dayTexts.length > 2 && (
-                                                            <Typography variant="caption" sx={{ fontSize: 9, color: isToday ? 'rgba(255,255,255,0.8)' : 'text.secondary' }}>
-                                                                +{dayTexts.length - 2} more
-                                                            </Typography>
-                                                        )}
-                                                    </Box>
-                                                    {dayTexts.length > 0 && dayTexts.length <= 2 && (
-                                                        <Chip
-                                                            label={`${dayTexts.length}`}
-                                                            size="small"
-                                                            color="secondary"
-                                                            sx={{ height: 18, fontSize: 11, mt: 'auto', alignSelf: 'flex-start' }}
-                                                        />
-                                                    )}
-                                                </Box>
-                                            </Grid>
-                                        )
-                                    })}
-                                </Grid>
+                                                            {dayTexts.slice(0, 2).map((tx, idx) => (
+                                                                <Typography
+                                                                    key={idx}
+                                                                    variant="caption"
+                                                                    noWrap
+                                                                    component="div"
+                                                                    sx={{
+                                                                        fontSize: 10,
+                                                                        bgcolor: isToday ? 'rgba(255,255,255,0.25)' : 'secondary.main',
+                                                                        color: '#fff',
+                                                                        borderRadius: 0.5,
+                                                                        px: 0.5,
+                                                                        mb: 0.25,
+                                                                        lineHeight: 1.6,
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis',
+                                                                    }}
+                                                                >
+                                                                    {tx.title}
+                                                                </Typography>
+                                                            ))}
+                                                            {dayTexts.length > 2 && (
+                                                                <Typography variant="caption" sx={{ fontSize: 9, color: isToday ? 'rgba(255,255,255,0.8)' : 'text.secondary' }}>
+                                                                    +{dayTexts.length - 2} more
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
+                                                    )
+                                                })}
+                                            </Box>
+                                        ))}
+                                    </Box>
+                                </Box>
                             </CardContent>
                         </Card>
                     </Grid>

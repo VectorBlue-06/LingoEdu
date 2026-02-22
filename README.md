@@ -10,7 +10,7 @@
   <a href="#features">Features</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="#tech-stack">Tech Stack</a> •
-  <a href="about.md">Full Documentation</a>
+  <a href="ABOUTME.md">Full Documentation</a>
 </p>
 
 ---
