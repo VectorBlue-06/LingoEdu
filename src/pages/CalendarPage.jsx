@@ -130,24 +130,24 @@ export function CalendarPage() {
             ) : (
                 <Grid container spacing={3} sx={{ px: 2, pb: 3 }}>
                     {/* Calendar grid */}
-                    <Grid item xs={12} md={8}>
+                    <Grid item xs={12} md={9}>
                         <Card variant="outlined" sx={{ borderRadius: 2 }}>
                             <CardContent>
                                 {/* Month navigation */}
-                                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
                                     <Typography
-                                        variant="body2"
-                                        sx={{ cursor: 'pointer', color: 'primary.main', fontWeight: 600 }}
+                                        variant="body1"
+                                        sx={{ cursor: 'pointer', color: 'primary.main', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}
                                         onClick={handlePrevMonth}
                                     >
                                         ← {t('calendar.prev')}
                                     </Typography>
-                                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
                                         {monthName} {currentYear}
                                     </Typography>
                                     <Typography
-                                        variant="body2"
-                                        sx={{ cursor: 'pointer', color: 'primary.main', fontWeight: 600 }}
+                                        variant="body1"
+                                        sx={{ cursor: 'pointer', color: 'primary.main', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}
                                         onClick={handleNextMonth}
                                     >
                                         {t('calendar.next')} →
@@ -159,8 +159,8 @@ export function CalendarPage() {
                                     {WEEKDAYS.map((d) => (
                                         <Grid item xs={12 / 7} key={d}>
                                             <Typography
-                                                variant="caption"
-                                                sx={{ textAlign: 'center', display: 'block', fontWeight: 600, color: 'text.secondary', pb: 1 }}
+                                                variant="body2"
+                                                sx={{ textAlign: 'center', display: 'block', fontWeight: 700, color: 'text.secondary', pb: 1, textTransform: 'uppercase', fontSize: 12, letterSpacing: 1 }}
                                             >
                                                 {d}
                                             </Typography>
@@ -173,7 +173,7 @@ export function CalendarPage() {
                                     {/* Empty cells for days before the 1st */}
                                     {Array.from({ length: firstDay }).map((_, i) => (
                                         <Grid item xs={12 / 7} key={`e-${i}`}>
-                                            <Box sx={{ height: 64 }} />
+                                            <Box sx={{ minHeight: { xs: 72, sm: 90, md: 110 } }} />
                                         </Grid>
                                     ))}
                                     {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -188,30 +188,62 @@ export function CalendarPage() {
                                             <Grid item xs={12 / 7} key={day}>
                                                 <Box
                                                     sx={{
-                                                        height: 64,
+                                                        minHeight: { xs: 72, sm: 90, md: 110 },
                                                         border: '1px solid',
                                                         borderColor: isToday ? 'primary.main' : 'divider',
-                                                        borderRadius: 1,
-                                                        p: 0.5,
+                                                        borderRadius: 1.5,
+                                                        p: 1,
                                                         bgcolor: isToday ? 'primary.main' : 'transparent',
                                                         overflow: 'hidden',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        cursor: 'default',
+                                                        transition: 'background-color 0.15s ease',
+                                                        '&:hover': {
+                                                            bgcolor: isToday ? 'primary.dark' : (theme) => theme.palette.mode === 'light' ? 'rgba(79, 60, 175, 0.04)' : 'rgba(207, 206, 224, 0.06)',
+                                                        },
                                                     }}
                                                 >
                                                     <Typography
-                                                        variant="caption"
+                                                        variant="body2"
                                                         sx={{
-                                                            fontWeight: isToday ? 700 : 400,
+                                                            fontWeight: isToday ? 700 : 500,
                                                             color: isToday ? '#fff' : 'text.primary',
+                                                            fontSize: { xs: 13, md: 15 },
                                                         }}
                                                     >
                                                         {day}
                                                     </Typography>
-                                                    {dayTexts.length > 0 && (
+                                                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25, mt: 0.5 }}>
+                                                        {dayTexts.slice(0, 2).map((tx, idx) => (
+                                                            <Typography
+                                                                key={idx}
+                                                                variant="caption"
+                                                                noWrap
+                                                                sx={{
+                                                                    fontSize: 10,
+                                                                    bgcolor: isToday ? 'rgba(255,255,255,0.25)' : 'secondary.main',
+                                                                    color: isToday ? '#fff' : '#fff',
+                                                                    borderRadius: 0.5,
+                                                                    px: 0.5,
+                                                                    lineHeight: 1.6,
+                                                                }}
+                                                            >
+                                                                {tx.title}
+                                                            </Typography>
+                                                        ))}
+                                                        {dayTexts.length > 2 && (
+                                                            <Typography variant="caption" sx={{ fontSize: 9, color: isToday ? 'rgba(255,255,255,0.8)' : 'text.secondary' }}>
+                                                                +{dayTexts.length - 2} more
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                    {dayTexts.length > 0 && dayTexts.length <= 2 && (
                                                         <Chip
                                                             label={`${dayTexts.length}`}
                                                             size="small"
                                                             color="secondary"
-                                                            sx={{ height: 16, fontSize: 10, mt: 0.25 }}
+                                                            sx={{ height: 18, fontSize: 11, mt: 'auto', alignSelf: 'flex-start' }}
                                                         />
                                                     )}
                                                 </Box>
@@ -224,7 +256,7 @@ export function CalendarPage() {
                     </Grid>
 
                     {/* Upcoming / recent texts sidebar */}
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={3}>
                         <Card variant="outlined" sx={{ borderRadius: 2 }}>
                             <CardContent>
                                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1 }}>
