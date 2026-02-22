@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="src/assets/logo full.png" alt="LingoEdu" width="280" />
+  <img src="src/assets/logo full.png" alt="LingoEdu" width="100%" style="max-height: 200px; object-fit: contain;" />
 </p>
-
-<h1 align="center">LingoEdu</h1>
 
 <p align="center">
   <strong>The modern classroom translation & content platform for educators and students.</strong>

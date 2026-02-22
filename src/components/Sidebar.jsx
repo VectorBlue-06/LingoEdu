@@ -81,6 +81,7 @@ export function Sidebar() {
                         height: 36,
                         borderRadius: 1.5,
                         objectFit: 'contain',
+                        bgcolor: 'transparent',
                     }}
                 />
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, letterSpacing: 0.5 }}>
